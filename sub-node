@@ -1,0 +1,1056 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "29dc6c22-f0a1-4828-b3f8-c00e52f32b24",
+      "typeVersion": 1.1,
+      "name": "Start",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        32,
+        864
+      ],
+      "alwaysOutputData": false,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "region_prompt",
+              "value": "=You are a strict text classifier for ARABIC DIALECTS.\n\n\n\nYour job:\n\n- Read the user’s input text.\n\n- Detect the MAIN ARABIC DIALECT based on wording, spelling, grammar, style, and expressions.\n\n- Map that dialect to EXACTLY ONE region from the list below.\n\n- Output MUST be ONLY the region name, with no extra words or punctuation.\n\n\n\nYou are classifying by DIALECT, not by topic or country mentioned.\n\n\n\nUse ONLY these region names and their dialect groups:\n\n\n\n1) GULF_REGION\n\n   Dialects: Emirati, Saudi (Najdi, Hijazi, Gulf), Qatari, Kuwaiti, Omani, Bahraini\n\n   Countries: United Arab Emirates, Saudi Arabia, Kuwait, Qatar, Oman, Bahrain\n\n\n\n2) YEMEN_REGION\n\n   Dialects: All Yemeni dialects (e.g., Sanaani, Taizi, Adeni, Hadhrami)\n\n   Country: Yemen\n\n\n\n3) IRAQ_REGION\n\n   Dialects: Iraqi Arabic (Baghdadi, Southern Iraqi, etc.)\n\n   Country: Iraq\n\n\n\n4) LEVANT_REGION\n\n   Dialects: Syrian, Lebanese, Palestinian, Jordanian\n\n   Countries: Syria, Lebanon, Palestine, Jordan\n\n\n\n5) EGYPT_REGION\n\n   Dialects: Egyptian Arabic (Cairene, Alexandrian, etc.)\n\n   Country: Egypt\n\n\n\n6) SUDAN_REGION\n\n   Dialects: Sudanese Arabic\n\n   Country: Sudan\n\n\n\n7) MAGHREB_REGION\n\n   Dialects: Moroccan, Algerian, Tunisian, Libyan, Mauritanian Arabic\n\n   Countries: Morocco, Algeria, Tunisia, Libya, Mauritania\n\n\n\n8) HORN_REGION\n\n   Dialects: Arabic as spoken in Somalia, Djibouti, Comoros\n\n   Countries: Somalia, Djibouti, Comoros\n\n\n\n9) MSA\n\n   Use this when the text is mainly:\n\n   - Modern Standard Arabic / Fus’ha\n\n   - Neutral news style, Qur’anic style, or formal written Arabic\n\n   - No clear signs of any regional dialect\n\n\n\n10) UNKNOWN\n\n   Use this when:\n\n   - The text is not in Arabic\n\n   - The text is too short or ambiguous to determine the dialect\n\n   - The dialect clearly does not match any region above\n\n\n\nImportant rules:\n\n\n\n- Focus on HOW the Arabic is written/spoken:\n\n  - Vocabulary (e.g., \"شو\" vs \"شنو\" vs \"واش\")\n\n  - Pronouns and particles (e.g., \"إنتو\" vs \"إنتوما\")\n\n  - Verb forms and endings\n\n  - Local expressions and slang\n\n- If the content mentions a specific country (like \"I live in Dubai\") but the dialect sounds clearly from another region, classify by DIALECT, not by the mentioned country.\n\n- If multiple dialects appear, choose the dialect that dominates most of the text.\n\n- If the text mixes dialect and MSA, choose the dialect if it is clearly identifiable; otherwise choose MSA.\n\n\n\nYour output must be EXACTLY ONE of these strings:\n\n  GULF_REGION\n\n  YEMEN_REGION\n\n  IRAQ_REGION\n\n  LEVANT_REGION\n\n  EGYPT_REGION\n\n  SUDAN_REGION\n\n  MAGHREB_REGION\n\n  HORN_REGION\n\n  MSA\n\n  UNKNOWN\n\n\n\nDo NOT add any explanations, comments, or extra text.\n\nReturn ONLY the region name.\n\n\n\nNow classify the following input and answer with ONLY the region name:\n\n\n{{$node[\"Start\"].json[\"message\"][\"text\"]}}"
+            }
+          ]
+        },
+        "options": {
+          "dotNotation": true
+        }
+      },
+      "id": "fa969b9c-9771-4214-9f57-34005586d18a",
+      "name": "Set Region Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        336,
+        864
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "region",
+              "value": "={{ $json.content.parts[0].text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "71e728ff-3407-4fc1-8c8e-184d21c54bca",
+      "name": "Normalize Gemini Region",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "754989fd-be8d-4dff-8462-a1aaa3475fee",
+              "name": "country",
+              "value": "={{ $json.country }}",
+              "type": "string"
+            },
+            {
+              "id": "07a9020f-5f63-4190-bb41-9eb9b15088b4",
+              "name": "text",
+              "value": "={{$node[\"Start\"].json[\"message\"][\"text\"]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9bb8f94b-b2e2-4d1e-b3d6-7aa7ccd7a386",
+      "name": "return1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        4064,
+        880
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.region_prompt }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        784,
+        608
+      ],
+      "id": "1a7d7eae-4fe7-4732-a991-96bcda1fa48d",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "tt4zxLzXd7NNwyIc",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5.1",
+          "mode": "list",
+          "cachedResultName": "GPT-5.1"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "={{ $json.region_prompt }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        784,
+        768
+      ],
+      "id": "390f0af3-804b-459f-9f13-4ba142a4850d",
+      "name": "Message a model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "6nD4z3pCwsevvyya",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "region",
+              "value": "={{ $json.output[0].content[0].text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "128c6b88-9c1e-43f0-8383-c53e7b6e7e47",
+      "name": "Normalize ChatGPT Region1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        768
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "qwen3-coder:480b",
+          "mode": "list",
+          "cachedResultName": "qwen3-coder:480b"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.region_prompt }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        768,
+        944
+      ],
+      "id": "d22c51f9-77f8-4d6f-8b85-8a4b59243d57",
+      "name": "Message a model2",
+      "credentials": {
+        "ollamaApi": {
+          "id": "Mv3PCdD32rkA3cGT",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "region",
+              "value": "={{ $json.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "11fb2ccb-2f1d-4d1c-b935-3ec77af33018",
+      "name": "Normalize Ollama Region1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        944
+      ]
+    },
+    {
+      "parameters": {
+        "model": "sonar-pro",
+        "messages": {
+          "message": [
+            {
+              "content": "={{ $json.region_prompt }}"
+            }
+          ]
+        },
+        "options": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.perplexity",
+      "typeVersion": 1,
+      "position": [
+        800,
+        1104
+      ],
+      "id": "09465a3e-2f37-4990-b808-9e9845e9de39",
+      "name": "Message a model3",
+      "credentials": {
+        "perplexityApi": {
+          "id": "rbZBbZ20GI4bNBxT",
+          "name": "Perplexity account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "region",
+              "value": "={{ $json.choices[0].message.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e4ea2167-bd2e-4641-9d47-849f967690d9",
+      "name": "Normalize Perplexity Region",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "model": "grok-4-0709",
+        "options": {
+          "responseFormat": "text"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatXAiGrok",
+      "typeVersion": 1,
+      "position": [
+        752,
+        1456
+      ],
+      "id": "ce3e26fe-fd4d-440a-86b8-d7266f0a03f4",
+      "name": "xAI Grok Chat Model",
+      "credentials": {
+        "xAiApi": {
+          "id": "HrACm0hjVkSIgFEr",
+          "name": "xAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.region_prompt }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        752,
+        1264
+      ],
+      "id": "eb5d0898-ed17-4a21-bfab-1600b741e49f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "region",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "87461f96-9c21-42d9-864d-46d0a4d17c29",
+      "name": "Normalize Grok Region1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        1264
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1600,
+        880
+      ],
+      "id": "3f650548-5a2e-401f-b9b1-6048e912ba70",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Count frequency of each region\nconst counts = {};\n\nfor (const item of items) {\n  const region = item.json.region;\n  counts[region] = (counts[region] || 0) + 1;\n}\n\n// Find the region with the highest count\nlet mostPopular = null;\nlet maxCount = 0;\n\nfor (const [region, count] of Object.entries(counts)) {\n  if (count > maxCount) {\n    mostPopular = region;\n    maxCount = count;\n  }\n}\n\nreturn [\n  {\n    json: {\n      region: mostPopular\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1824,
+        944
+      ],
+      "id": "92179fde-0c08-474c-a42e-d1c99ed728bd",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "Country_prompt",
+              "value": "=You are a strict Arabic COUNTRY classifier. \nYou will receive two inputs:\n1) The REGION (already determined)\n2) The INPUT_TEXT written in an Arabic dialect\n\nYour job:\n- Analyze the dialect, wording, spelling, slang, and expressions in the INPUT_TEXT.\n- Choose the SINGLE MOST LIKELY country INSIDE the provided region.\n- NEVER output a country outside the provided region.\n- Output must be EXACTLY one country name with no explanations.\n\nUse the region-to-country mapping below:\n\nREGION: GULF_REGION\nCountries:\n  - United Arab Emirates\n  - Saudi Arabia\n  - Kuwait\n  - Qatar\n  - Oman\n  - Bahrain\n\nREGION: YEMEN_REGION\nCountries:\n  - Yemen\n\nREGION: IRAQ_REGION\nCountries:\n  - Iraq\n\nREGION: LEVANT_REGION\nCountries:\n  - Jordan\n  - Lebanon\n  - Palestine\n  - Syria\n\nREGION: NILE_REGION\nCountries:\n  - Egypt\n  - Sudan\n\nREGION: MAGHREB_REGION\nCountries:\n  - Morocco\n  - Algeria\n  - Tunisia\n  - Libya\n  - Mauritania\n\nREGION: HORN_REGION\nCountries:\n  - Somalia\n  - Djibouti\n  - Comoros\n\n\nClassification Rules:\n- Focus ONLY on the dialect features (e.g., vocabulary like “واش”, “شنو”, “شو”, “ترى”, “ويه”, “هاج”).\n- If the text clearly matches one country’s dialect → return that country.\n- If multiple countries share similar dialects (e.g., Gulf):\n  - Choose the country whose dialectal features most strongly match.\n  - If tied, choose the most commonly associated country for those features.\n- If the dialect is ambiguous but fits the region, choose the MOST PROBABLE country (do NOT output UNKNOWN).\n- ONLY choose from the countries listed under the REGION provided.\n- Output MUST be ONLY the country name.\n\nFORMAT:\nReturn only the country, nothing else.\n\nNow classify the following:\nREGION: {{ $json.region }}\nINPUT_TEXT: {{$node[\"Start\"].json[\"message\"][\"text\"]}}\n"
+            }
+          ]
+        },
+        "options": {
+          "dotNotation": true
+        }
+      },
+      "id": "b6d5bfd1-3ea4-48fd-ae60-efe267574482",
+      "name": "Set Region Prompt1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        2096,
+        976
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "country",
+              "value": "={{ $json.content.parts[0].text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "40beb479-8475-4097-99dc-1dfbdf30f3a6",
+      "name": "Normalize Gemini Region1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        3136,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.Country_prompt }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        2704,
+        560
+      ],
+      "id": "84c145cd-c733-446f-96a6-4d4de181298b",
+      "name": "Message a model4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "tt4zxLzXd7NNwyIc",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-5.1",
+          "mode": "list",
+          "cachedResultName": "GPT-5.1"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "={{ $json.Country_prompt }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        2704,
+        720
+      ],
+      "id": "eb6c4491-3ecb-4e6f-b1f6-5c48bbd84252",
+      "name": "Message a model5",
+      "credentials": {
+        "openAiApi": {
+          "id": "6nD4z3pCwsevvyya",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "country",
+              "value": "={{ $json.output[0].content[0].text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "aca11e70-08c3-4457-9ae9-83b7ebf4a710",
+      "name": "Normalize ChatGPT Region",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        3136,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "qwen3-coder:480b",
+          "mode": "list",
+          "cachedResultName": "qwen3-coder:480b"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.Country_prompt }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        2688,
+        896
+      ],
+      "id": "4bec1413-fd51-48d7-aa8b-326753f00bdc",
+      "name": "Message a model6",
+      "credentials": {
+        "ollamaApi": {
+          "id": "Mv3PCdD32rkA3cGT",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "country",
+              "value": "={{ $json.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "aea0e44a-0e02-4a3d-ab5e-56b0e020c805",
+      "name": "Normalize Ollama Region",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        3136,
+        896
+      ]
+    },
+    {
+      "parameters": {
+        "model": "sonar-pro",
+        "messages": {
+          "message": [
+            {
+              "content": "={{ $json.Country_prompt }}"
+            }
+          ]
+        },
+        "options": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.perplexity",
+      "typeVersion": 1,
+      "position": [
+        2720,
+        1056
+      ],
+      "id": "3da8ecd5-44b5-41c1-9fbf-37ccd5be98ef",
+      "name": "Message a model7",
+      "credentials": {
+        "perplexityApi": {
+          "id": "rbZBbZ20GI4bNBxT",
+          "name": "Perplexity account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "country",
+              "value": "={{ $json.choices[0].message.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0cc57566-324f-4ab1-9455-1d600b0c0352",
+      "name": "Normalize Perplexity Region1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        3136,
+        1056
+      ]
+    },
+    {
+      "parameters": {
+        "model": "grok-4-0709",
+        "options": {
+          "responseFormat": "text"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatXAiGrok",
+      "typeVersion": 1,
+      "position": [
+        2672,
+        1408
+      ],
+      "id": "3f38a35b-0e33-4c7f-86aa-797925249271",
+      "name": "xAI Grok Chat Model1",
+      "credentials": {
+        "xAiApi": {
+          "id": "HrACm0hjVkSIgFEr",
+          "name": "xAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Country_prompt }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2672,
+        1216
+      ],
+      "id": "282451d0-f06d-4aa8-a7c9-21e50d527483",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "country",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2e38d359-4942-4902-ba11-3e113afec025",
+      "name": "Normalize Grok Region",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        3136,
+        1216
+      ]
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        3520,
+        832
+      ],
+      "id": "d1c96a6e-0c2b-4c78-8a5a-0e22a5123ae7",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Count frequency of each country\nconst counts = {};\n\nfor (const item of items) {\n  const country = item.json.country;\n  counts[country] = (counts[country] || 0) + 1;\n}\n\n// Find the country with the highest count\nlet mostPopular = null;\nlet maxCount = 0;\n\nfor (const [country, count] of Object.entries(counts)) {\n  if (count > maxCount) {\n    mostPopular = country;\n    maxCount = count;\n  }\n}\n\nreturn [\n  {\n    json: {\n      country: mostPopular\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3776,
+        880
+      ],
+      "id": "49316714-2108-4dbc-aefb-bed053c67c40",
+      "name": "Code in JavaScript1"
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Set Region Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Region Prompt": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Message a model2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Message a model3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Gemini Region": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Normalize Gemini Region",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Normalize ChatGPT Region1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize ChatGPT Region1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Message a model2": {
+      "main": [
+        [
+          {
+            "node": "Normalize Ollama Region1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Ollama Region1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Message a model3": {
+      "main": [
+        [
+          {
+            "node": "Normalize Perplexity Region",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Perplexity Region": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "xAI Grok Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Normalize Grok Region1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Grok Region1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Set Region Prompt1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Region Prompt1": {
+      "main": [
+        [
+          {
+            "node": "Message a model4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Message a model5",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Message a model6",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Message a model7",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Gemini Region1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model4": {
+      "main": [
+        [
+          {
+            "node": "Normalize Gemini Region1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model5": {
+      "main": [
+        [
+          {
+            "node": "Normalize ChatGPT Region",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize ChatGPT Region": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Message a model6": {
+      "main": [
+        [
+          {
+            "node": "Normalize Ollama Region",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Ollama Region": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Message a model7": {
+      "main": [
+        [
+          {
+            "node": "Normalize Perplexity Region1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Perplexity Region1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "xAI Grok Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Normalize Grok Region",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Grok Region": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "return1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f93adcdc695e0d1bd8bcfad8dff32f949d7d27d1710a524cc1bb48e62d4b27a7"
+  }
+}
